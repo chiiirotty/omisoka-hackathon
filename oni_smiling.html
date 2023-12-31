@@ -1,0 +1,47 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Speech API</title>
+<script src="https://unpkg.com/obniz@3.3.0/obniz.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script>
+window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+var recognition = new webkitSpeechRecognition();
+recognition.lang = 'ja';
+
+// 録音終了時トリガー
+recognition.addEventListener('result', function(event){
+    var obniz = new Obniz("OBNIZ_ID_HERE");
+    var text = event.results.item(0).item(0).transcript;
+    if(text.includes('来年') || text.includes('2024年') || text.includes('令和六年') || text.includes('令和6年')) {
+        text = text + 'とかうける'
+        obniz.onconnect = async function () {
+            var servo = obniz.wired("ServoMotor", {gnd:0, vcc:1, signal:2});
+            servo.angle(90);
+            await obniz.wait(1000);
+            servo.angle(180);
+            await obniz.wait(2000);
+            servo.angle(90);
+        };
+    } else {
+        text = 'ふーん';
+    }
+    $("#result_text").val(text);
+}, false);
+
+// 録音開始
+function record()
+{
+    recognition.start();
+}
+</script>
+</head>
+
+<body>
+<h2>鬼を笑わせろ👹</h2>
+<textarea id="result_text" cols="100" rows="10">
+</textarea>
+<br />
+<input type="button" onClick="record()" value="抱負をどうぞ" />
+</body>
+</html>
